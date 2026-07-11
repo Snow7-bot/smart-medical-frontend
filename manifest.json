@@ -1,0 +1,15 @@
+{
+  "name": "智能医疗助手",
+  "appid": "__UNI__XXXXXXX",
+  "description": "",
+  "versionName": "1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "app-plus": {
+    "usingComponents": true,
+    "compilerVersion": 3,
+    "splashscreen": { "alwaysShowBeforeRender": true, "autoclose": true }
+  },
+  "mp-weixin": { "appid": "", "setting": { "urlCheck": false }, "usingComponents": true },
+  "vueVersion": "3"
+}

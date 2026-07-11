@@ -1,0 +1,42 @@
+{
+  "pages": [
+    { "path": "pages/tabbar/home/home", "style": { "navigationBarTitleText": "健康助手", "navigationStyle": "custom" } },
+    { "path": "pages/tabbar/health/health", "style": { "navigationBarTitleText": "健康监测", "navigationStyle": "custom" } },
+    { "path": "pages/tabbar/medication/medication", "style": { "navigationBarTitleText": "用药管理", "navigationStyle": "custom" } },
+    { "path": "pages/tabbar/profile/profile", "style": { "navigationBarTitleText": "我的", "navigationStyle": "custom" } },
+    { "path": "pages/login/login", "style": { "navigationBarTitleText": "登录", "navigationStyle": "custom" } },
+    { "path": "pages/register/register", "style": { "navigationBarTitleText": "注册", "navigationStyle": "custom" } },
+    { "path": "pages/family/list", "style": { "navigationBarTitleText": "家庭成员", "navigationStyle": "custom" } },
+    { "path": "pages/family/add", "style": { "navigationBarTitleText": "添加成员", "navigationStyle": "custom" } },
+    { "path": "pages/family/detail", "style": { "navigationBarTitleText": "健康档案", "navigationStyle": "custom" } },
+    { "path": "pages/consultation/index", "style": { "navigationBarTitleText": "AI问诊", "navigationStyle": "custom" } },
+    { "path": "pages/consultation/chat", "style": { "navigationBarTitleText": "AI问诊", "navigationStyle": "custom" } },
+    { "path": "pages/consultation/history", "style": { "navigationBarTitleText": "问诊记录", "navigationStyle": "custom" } },
+    { "path": "pages/health/record", "style": { "navigationBarTitleText": "记录指标", "navigationStyle": "custom" } },
+    { "path": "pages/health/trend", "style": { "navigationBarTitleText": "趋势分析", "navigationStyle": "custom" } },
+    { "path": "pages/health/report", "style": { "navigationBarTitleText": "健康报告", "navigationStyle": "custom" } },
+    { "path": "pages/medication/add", "style": { "navigationBarTitleText": "添加药品", "navigationStyle": "custom" } },
+    { "path": "pages/medication/detail", "style": { "navigationBarTitleText": "药品详情", "navigationStyle": "custom" } },
+    { "path": "pages/medication/children", "style": { "navigationBarTitleText": "儿童用药", "navigationStyle": "custom" } },
+    { "path": "pages/medication/scan", "style": { "navigationBarTitleText": "扫描药盒", "navigationStyle": "custom" } },
+    { "path": "pages/profile/edit", "style": { "navigationBarTitleText": "编辑资料", "navigationStyle": "custom" } },
+    { "path": "pages/settings/index", "style": { "navigationBarTitleText": "设置", "navigationStyle": "custom" } }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F5FA"
+  },
+  "tabBar": {
+    "color": "#9CA3AF",
+    "selectedColor": "#667eea",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/tabbar/home/home", "iconPath": "static/tab_home.png", "selectedIconPath": "static/tab_home_active.png", "text": "首页" },
+      { "pagePath": "pages/tabbar/health/health", "iconPath": "static/tab_health.png", "selectedIconPath": "static/tab_health_active.png", "text": "健康" },
+      { "pagePath": "pages/tabbar/medication/medication", "iconPath": "static/tab_med.png", "selectedIconPath": "static/tab_med_active.png", "text": "用药" },
+      { "pagePath": "pages/tabbar/profile/profile", "iconPath": "static/tab_profile.png", "selectedIconPath": "static/tab_profile_active.png", "text": "我的" }
+    ]
+  }
+}

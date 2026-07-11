@@ -1,0 +1,23 @@
+/* === 蓝紫渐变设计系统 === */
+$gradient: linear-gradient(135deg, #667eea, #764ba2);
+$gradient-light: linear-gradient(135deg, #a18cd1, #fbc2eb);
+$gradient-blue: linear-gradient(135deg, #4facfe, #00f2fe);
+$gradient-green: linear-gradient(135deg, #43e97b, #38f9d7);
+$primary: #667eea;
+$primary-dark: #5a6fd6;
+$accent: #4facfe;
+$success: #43e97b;
+$warning: #f6d365;
+$danger: #fa709a;
+$bg: #F5F5FA;
+$white: #FFFFFF;
+$card-bg: #FFFFFF;
+$input-bg: #F0F0F5;
+$text: #1A1A2E;
+$text2: #6B7280;
+$text3: #9CA3AF;
+$border: rgba(0,0,0,0.05);
+$shadow: 0 4px 20px rgba(0,0,0,0.06);
+$shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+
+page { background:$bg; color:$text; font-size:15px; }
