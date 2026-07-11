@@ -24,6 +24,7 @@ import { ref, onMounted } from "vue";
 import { userApi } from "@/api/user.js";
 import { healthApi } from "@/api/health.js";
 import { useAppStore } from "@/store";
+import env from "@/env.js";
 const store = useAppStore();
 
 const notify = ref({ med: true, report: true });
@@ -45,7 +46,7 @@ function tap() {
 function checkConnection() {
   uni.showModal({
     title: "API 连接状态",
-    content: `状态: ${apiStatus.value}\n后端地址: ${"http://10.1.249.238:3000/api"}\n认证: ${store.isLoggedIn ? "已登录" : "未登录"}`,
+    content: `状态: ${apiStatus.value}\n后端地址: ${env.API_BASE_URL}\n认证: ${store.isLoggedIn ? "已登录" : "未登录"}`,
     showCancel: false
   });
 }

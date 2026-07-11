@@ -1,4 +1,5 @@
-﻿import req from "@/utils/request.js";
+import req from "@/utils/request.js";
+import env from "@/env.js";
 
 export const asrApi = {
   /**
@@ -10,7 +11,7 @@ export const asrApi = {
     // uni-app 上传文件需要使用 uni.uploadFile
     return new Promise((resolve, reject) => {
       uni.uploadFile({
-        url: "http://192.168.200.64:3000/api/asr/recognize",
+        url: env.ASR_URL,
         filePath: filePath,
         name: "audio",
         header: {

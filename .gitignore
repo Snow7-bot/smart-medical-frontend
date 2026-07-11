@@ -10,5 +10,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+# 环境配置（含真实地址，不提交）
+env.js
+
 # 微信小程序私密配置
 project.private.config.json

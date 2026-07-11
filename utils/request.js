@@ -1,4 +1,6 @@
-const BASE_URL = "http://192.168.200.64:8080/api";
+import env from '@/env.js';
+
+const BASE_URL = env.API_BASE_URL;
 
 function getToken() {
   try { return uni.getStorageSync("auth_token"); } catch { return ""; }
