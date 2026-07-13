@@ -30,7 +30,7 @@ async function checkInteract(){
   try {
     const res = await medApi.checkInteraction([f.value.name]);
     const data = res.data || res;
-    const msg = data.message || data.result || data.aiAnalysis || "AI分析中，暂未发现已知相互作用。";
+    const msg = data.detail || (data.hasRisk ? "检测到潜在相互作用" : "暂未发现已知相互作用");
     uni.showModal({title:"AI冲突分析",content:msg,showCancel:false});
   } catch(e) {
     // 降级：本地提示

@@ -15,7 +15,7 @@
     <text class="add-plus">+</text><text>记录新指标</text>
   </view>
 
-  <view class="metric-card" v-for="m in metrics" :key="m.key" @click="nav('/pages/health/trend')">
+  <view class="metric-card" v-for="m in metrics" :key="m.key" @click="nav('/pages/health/trend?type=' + m.key)">
     <view class="mc-left">
       <image class="mc-icon" :src="m.icon"></image>
       <view class="mc-info">
@@ -73,7 +73,6 @@ function selectMember(i){
 function nav(url) { uni.navigateTo({ url }); }
 
 function loadRecords() {
-  // 根据当前选中的成员加载对应记录
   const params = {};
   if (store.currentMember && store.currentMember.id) {
     params.patientId = store.currentMember.id;
@@ -113,10 +112,39 @@ function updateMetrics(records) {
   metrics.value = ["bp","bs","bo","hr","wt"].map(k => {
     const data = latest[k];
     if (data) {
-      return { key:k, icon:data.icon, label:data.label, value:data.value, unit:data.unit, desc:"最新记录", status:{label:"正常",color:"#43e97b"} };
+      return { key:k, icon:data.icon, label:data.label, value:data.value, unit:data.unit, desc:"最新记录", status: calcStatus(k, data.value) };
     }
     return metrics.value.find(m => m.key === k);
   });
+}
+
+function calcStatus(key, value) {
+  if (!value || value === "--") return { label: "无数据", color: "#9CA3AF" };
+  const parts = value.toString().split("/");
+  const v = parseFloat(parts[0]);
+  if (isNaN(v)) return { label: "正常", color: "#43e97b" };
+  switch (key) {
+    case "bp": {
+      const dia = parseFloat(parts[1]) || 0;
+      if (v >= 140 || dia >= 90) return { label: "偏高", color: "#fa709a" };
+      if (v >= 130 || dia >= 85) return { label: "偏高", color: "#f6d365" };
+      return { label: "正常", color: "#43e97b" };
+    }
+    case "bs":
+      if (v > 7.0) return { label: "偏高", color: "#fa709a" };
+      if (v > 6.1) return { label: "偏高", color: "#f6d365" };
+      return { label: "正常", color: "#43e97b" };
+    case "bo":
+      if (v < 95) return { label: "偏低", color: "#fa709a" };
+      return { label: "正常", color: "#43e97b" };
+    case "hr":
+      if (v > 100 || v < 50) return { label: "异常", color: "#fa709a" };
+      return { label: "正常", color: "#43e97b" };
+    case "wt":
+      return { label: "标准", color: "#4facfe" };
+    default:
+      return { label: "正常", color: "#43e97b" };
+  }
 }
 
 onMounted(()=>{
@@ -125,7 +153,6 @@ onMounted(()=>{
   uni.$on("familyUpdated", () => store.loadMembers());
 });
 
-// 每次切换到该 tab 时重新加载数据
 onShow(() => {
   loadRecords();
 });

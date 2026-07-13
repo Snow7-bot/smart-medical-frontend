@@ -16,7 +16,7 @@
   </view>
   <view class="section"><text>医疗记录</text><text class="add-link" @click="addRec">＋ 添加</text></view>
   <view class="card" style="margin-bottom:30px">
-    <view class="dr" v-for="r in recs" :key="r.id"><text class="dk">{{ r.type }}</text><text class="dv">{{ r.date }}</text></view>
+    <view class="dr" v-for="r in recs" :key="r.id" @click="viewSummary(r)"><text class="dk">{{ r.type }}</text><text class="dv">{{ r.date }} &#x2192;</text></view>
     <text class="empty" v-if="recs.length===0">暂无记录</text>
   </view>
   <view class="delete-btn" @click="handleDelete">删除成员</view>
@@ -32,13 +32,9 @@ import { medicalRecordApi } from "@/api/medical-record.js";
 const store = useAppStore();
 const colors=["#667eea","#4facfe","#43e97b","#f6d365","#fa709a"];
 const m=ref(store.currentMember || {id:1,name:"未知",age:0,gender:"male",relation:"未知",history:"无",allergy:"无"});
-const recs=ref([
-  {id:1,type:"年度体检",date:"2026-05-01"},
-  {id:2,type:"门诊记录",date:"2026-06-15"},
-]);
+const recs=ref([]);
 
 onMounted(async () => {
-  // 从后端获取最新成员详情
   if (store.currentMember?.id) {
     try {
       const detail = await familyApi.getDetail(store.currentMember.id);
@@ -56,20 +52,39 @@ onMounted(async () => {
       }
     } catch(e) {}
   }
-  // 从后端获取医疗记录
+  loadRecords();
+});
+
+async function loadRecords() {
   try {
-    const patientId = m.value.id;
-    const records = await medicalRecordApi.listByPatient(patientId);
+    const records = await medicalRecordApi.listByPatient(m.value.id);
     const data = records.data || records;
     if (data && data.length > 0) {
       recs.value = data.map(r => ({
         id: r.id,
-        type: r.type || r.recordType || "病历",
+        type: r.recordType || r.type || "病历",
         date: r.recordDate || r.createdDate || "",
       }));
     }
   } catch(e) {}
-});
+}
+
+function viewSummary(r) {
+  uni.showLoading({ title: "分析中..." });
+  medicalRecordApi.getSummary(r.id).then(res => {
+    uni.hideLoading();
+    const data = res.data || res;
+    const analysis = data.analysis || "暂无分析结果";
+    uni.showModal({
+      title: "AI分析 · " + r.type,
+      content: analysis.substring(0, 500),
+      showCancel: false
+    });
+  }).catch(() => {
+    uni.hideLoading();
+    uni.showToast({ title: "获取失败", icon: "none" });
+  });
+}
 
 function addRec(){
   uni.showActionSheet({
@@ -81,8 +96,22 @@ function addRec(){
         success: (chooseRes) => {
           uni.showLoading({title:"上传中..."});
           medicalRecordApi.upload(chooseRes.tempFilePaths[0], m.value.id)
-            .then(() => {
+            .then((record) => {
               uni.hideLoading();
+              // OCR + AI 分析完成，获取摘要并展示
+              if (record && record.id) {
+                loadRecords();
+                medicalRecordApi.getSummary(record.id).then(res => {
+                  const summary = (res.data || res).analysis || '';
+                  if (summary) {
+                    uni.showModal({
+                      title: 'AI分析结果',
+                      content: summary.substring(0, 500),
+                      showCancel: false
+                    });
+                  }
+                }).catch(() => {});
+              }
               uni.showToast({title:"上传成功",icon:"success"});
             })
             .catch(() => {

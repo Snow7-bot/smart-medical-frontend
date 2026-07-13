@@ -1,18 +1,18 @@
 <template>
 <view class="page">
   <view class="status-bar-fill"></view>
-  <view class="nav"><view class="back" @click="uni.navigateBack()">&#x2039;</view><text class="nav-t">趋势分析</text></view>
+  <view class="nav"><view class="back" @click="uni.navigateBack()">&#x2039;</view><text class="nav-t">{{ labels[metricType] || '指标' }}趋势</text></view>
   <view class="content">
     <view class="periods">
       <view class="p-item" v-for="p in periods" :key="p" :class="{on:period===p}" @click="period=p">{{ p }}</view>
     </view>
     <view class="card">
-      <view class="chart-header"><text class="ch-t">血压趋势</text><text class="ch-sub">本周</text></view>
+      <view class="chart-header"><text class="ch-t">{{ labels[metricType] || '指标' }}趋势</text><text class="ch-sub">{{ period }}</text></view>
       <view class="chart-area">
         <view class="bar-row" v-for="(d,i) in trend" :key="i">
           <text class="bar-label">{{ d.day }}</text>
           <view class="bar-wrap"><view class="bar" :style="{width:d.val+'%',background:d.color}"></view></view>
-          <text class="bar-val" :style="{color:d.color}">{{ d.sys }}/{{ d.dia }}</text>
+          <text class="bar-val" :style="{color:d.color}">{{ d.sys || d.value }}{{ d.dia ? '/' + d.dia : '' }}</text>
         </view>
       </view>
       <view class="chart-legend">
@@ -30,60 +30,53 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, watch } from "vue";
+import { onLoad } from "@dcloudio/uni-app";
 import { healthApi } from "@/api/health.js";
 const periods=["日","周","月","年"];
 const period=ref("周");
-const trendDefault=[{day:"周一",val:55,sys:"120",dia:"80",color:"#43e97b"},{day:"周二",val:62,sys:"132",dia:"85",color:"#f6d365"},{day:"周三",val:48,sys:"116",dia:"76",color:"#43e97b"},{day:"周四",val:70,sys:"142",dia:"92",color:"#fa709a"},{day:"周五",val:50,sys:"125",dia:"79",color:"#43e97b"},{day:"周六",val:52,sys:"130",dia:"84",color:"#f6d365"},{day:"周日",val:45,sys:"118",dia:"78",color:"#43e97b"}];
-const trend=ref(JSON.parse(JSON.stringify(trendDefault)));
-const datalist=ref([{date:"06-21",time:"08:00",value:"128/82",color:"#43e97b"},{date:"06-22",time:"08:15",value:"132/85",color:"#f6d365"},{date:"06-23",time:"09:00",value:"142/92",color:"#fa709a"},{date:"06-24",time:"07:45",value:"130/84",color:"#f6d365"},{date:"06-25",time:"08:30",value:"126/80",color:"#43e97b"}]);
+const metricType = ref("bp");
+const labels = { bp:"血压", bs:"血糖", bo:"血氧", hr:"心率", wt:"体重" };
+
+onLoad((options) => {
+  if (options && options.type) metricType.value = options.type;
+  loadTrend();
+});
+
+const trend=ref([]);
+const datalist=ref([]);
 
 async function loadTrend() {
   try {
-    const list = await healthApi.getTrend({ metricType: "bp" });
+    const list = await healthApi.getTrend({ metricType: metricType.value });
     if (list && list.length > 0) {
       const items = list.slice(0, 10).reverse();
-      // 后端返回格式: { date, time, metricType, value }
-      // value 为 "120/80" 的字符串
       trend.value = items.map((d, i) => {
-        const parts = (d.value || "120/80").split("/");
-        const sys = parseInt(parts[0]) || 120;
-        const dia = parseInt(parts[1]) || 80;
-        const percent = Math.min(100, Math.max(10, ((sys - 80) / 100) * 100));
-        const color = sys > 140 || dia > 90 ? "#fa709a" : (sys > 130 || dia > 85 ? "#f6d365" : "#43e97b");
-        return {
-          day: (d.date || "").substring(5) || "第"+(i+1)+"天",
-          val: percent,
-          sys: String(sys),
-          dia: String(dia),
-          color: color,
-        };
+        const parts = (d.value || "").split("/");
+        const sys = parseInt(parts[0]) || 0;
+        const dia = parseInt(parts[1]) || 0;
+        const percent = parts.length > 1
+          ? Math.min(100, Math.max(10, ((sys - 80) / 100) * 100))
+          : Math.min(100, Math.max(10, (sys / 200) * 100));
+        const color = sys > 140 || dia > 90 ? "#fa709a"
+          : sys > 130 || dia > 85 ? "#f6d365"
+          : "#43e97b";
+        return { day: (d.date || "").substring(5) || "第"+(i+1)+"天", val: percent, sys: String(sys), dia: dia ? String(dia) : null, value: d.value, color };
       });
-      datalist.value = items.map(d => {
-        const parts = (d.value || "120/80").split("/");
-        const sys = parseInt(parts[0]) || 120;
-        const dia = parseInt(parts[1]) || 80;
-        const color = sys > 140 || dia > 90 ? "#fa709a" : (sys > 130 || dia > 85 ? "#f6d365" : "#43e97b");
-        return {
-          date: (d.date || "").substring(5) || "",
-          time: d.time || "",
-          value: parts[0]+"/"+parts[1],
-          color: color,
-        };
-      });
-      return;
+      datalist.value = items.map(d => ({
+        date: d.day, time: "", value: d.value, color: d.color,
+      }));
+    } else {
+      trend.value = [];
+      datalist.value = [];
     }
   } catch(e) {
-    console.log("loadTrend error:", e);
+    trend.value = [];
+    datalist.value = [];
   }
-  // 无数据时显示空状态
-  trend.value = [];
-  datalist.value = [];
 }
 
 watch(period, loadTrend);
-
-onMounted(loadTrend);
 </script>
 
 <style lang="scss" scoped>
@@ -114,7 +107,3 @@ onMounted(loadTrend);
 .dl-val { font-size:16px; font-weight:700; margin-right:10px; }
 .dl-time { font-size:12px; color:#9CA3AF; }
 </style>
-
-
-
-

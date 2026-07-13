@@ -23,21 +23,36 @@
 <script setup>
 import { ref } from "vue";
 import { medApi } from "@/api/medication.js";
-const drugs=["阿莫西林胶囊","布洛芬混悬液","头孢克肟颗粒"];
+const drugs=ref([]);
 const di=ref(0),age=ref(""),wt=ref(""),showRes=ref(false),resultDose=ref(""),resultUnit=ref("");
 async function calc(){
   if(!age.value||!wt.value){uni.showToast({title:"请输入年龄和体重",icon:"none"});return;}
   try {
-    const res = await medApi.calcDosage({ drugName: drugs[di.value], age: age.value, weight: wt.value });
+    const dName = drugs.value[di.value] || "";
+    const res = await medApi.calcDosage({ drugName: dName, age: age.value, weight: wt.value });
     const data = res.data || res;
-    resultDose.value = data.recommendedDose || "0.5";
-    resultUnit.value = data.unit || "粒/每次";
+    resultDose.value = data.recommendedDose || data.dosage || "--";
+    resultUnit.value = data.unit || "mg/每次";
   } catch(e) {
-    resultDose.value = "0.5";
-    resultUnit.value = "粒/每次";
+    resultDose.value = "--";
+    resultUnit.value = "mg/每次";
   }
   showRes.value = true;
 }
+
+import { onMounted } from "vue";
+onMounted(async () => {
+  try {
+    const list = await medApi.getList();
+    if (list && list.length > 0) {
+      drugs.value = list.map(d => d.name);
+    } else {
+      drugs.value = ["阿莫西林胶囊","布洛芬混悬液","头孢克肟颗粒"];
+    }
+  } catch(e) {
+    drugs.value = ["阿莫西林胶囊","布洛芬混悬液","头孢克肟颗粒"];
+  }
+});
 </script>
 
 <style lang="scss" scoped>
