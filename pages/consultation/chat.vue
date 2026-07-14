@@ -1,7 +1,7 @@
 ﻿<template>
 <view class="page">
   <view class="status-bar-fill"></view>
-  <view class="nav"><view class="back" @click="uni.navigateBack()">&#x2039;</view><text class="nav-t">AI问诊中</text></view>
+  <view class="nav"><view class="back" @click="uni.navigateBack()">&#x2039;</view><text class="nav-t">AI问诊 · {{ memberName || '未选择成员' }}</text></view>
 
   <view class="msg-wrap">
     <scroll-view class="msgs" scroll-y :scroll-into-view="scrollToId" scroll-with-animation id="msgList">
@@ -9,6 +9,12 @@
         <view class="bubble" :class="m.role + '-bubble'">
           <rich-text v-if="m.role === 'ai'" :nodes="formatAiContent(m.content)"></rich-text>
           <text v-else>{{ m.content }}</text>
+        </view>
+      </view>
+      <view class="msg ai" v-if="thinking">
+        <view class="bubble ai-bubble thinking-bubble">
+          <text class="thinking-dot">●</text><text class="thinking-dot">●</text><text class="thinking-dot">●</text>
+          <text class="thinking-text">AI思考中...</text>
         </view>
       </view>
       <view id="bottom-anchor" style="height:1px;"></view>
@@ -41,6 +47,18 @@ const isHolding = ref(false);
 const isCancel = ref(false);
 const scrollToId = ref("");
 const convId = ref(null);
+const thinking = ref(false);
+const memberId = ref(null);
+const memberName = ref("");
+
+onMounted(() => {
+  const pages = getCurrentPages();
+  const opts = (pages[pages.length - 1] || {}).options || {};
+  if (opts.memberId) memberId.value = opts.memberId;
+  if (opts.memberName) memberName.value = decodeURIComponent(opts.memberName);
+  if (opts.q) { txt.value = decodeURIComponent(opts.q); setTimeout(() => sendMsg(), 200); }
+  scrollToBottom();
+});
 
 const holdText = computed(() => {
   if (!isHolding.value) return "按住说话";
@@ -130,17 +148,22 @@ async function sendMsg() {
   messages.value.push({id: Date.now(), role:"user", content: t});
   txt.value = "";
   scrollToBottom();
+  thinking.value = true;
+  scrollToBottom();
   try {
     const payload = { message: t };
     if (convId.value) payload.conversationId = convId.value;
+    if (memberId.value) payload.patientId = Number(memberId.value);
     const res = await consultApi.sendText(payload);
     const data = res.data || res;
     if (data.conversationId) convId.value = data.conversationId;
     const reply = data.reply || "收到您的描述，请多休息多喝水，密切观察。如症状加重请及时就医。";
     messages.value.push({id: Date.now() + 1, role:"ai", content: reply});
-    scrollToBottom();
   } catch(e) {
     messages.value.push({id: Date.now() + 1, role:"ai", content: "抱歉，服务暂不可用，请稍后重试。"});
+  } finally {
+    thinking.value = false;
+    scrollToBottom();
   }
 }
 
@@ -188,10 +211,6 @@ function onRecordMove(e) {
   isCancel.value = dist < -40;
 }
 
-onMounted(() => {
-  scrollToBottom();
-});
-
 onUnmounted(() => {
   // 页面离开时停止录音
   if (recorderManager && isHolding.value) {
@@ -222,4 +241,10 @@ onUnmounted(() => {
 .voice-hold { flex:1; padding:12px 16px; background:#F5F5FA; border-radius:22px; font-size:15px; text-align:center; color:#9CA3AF; user-select:none; -webkit-user-select:none; }
 .voice-hold.recording { background:rgba(102,126,234,0.1); color:#667eea; font-weight:600; }
 .voice-hold.cancel { background:rgba(250,112,154,0.12); color:#fa709a; }
+.thinking-bubble { display:flex; align-items:center; gap:4px; padding:10px 18px; }
+.thinking-dot { font-size:8px; color:#667eea; animation: blink 1.4s infinite; }
+.thinking-dot:nth-child(2) { animation-delay:0.2s; }
+.thinking-dot:nth-child(3) { animation-delay:0.4s; }
+.thinking-text { font-size:13px; color:#9CA3AF; margin-left:6px; }
+@keyframes blink { 0%,80%,100%{opacity:0.2;} 40%{opacity:1;} }
 </style>

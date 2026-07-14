@@ -9,6 +9,7 @@
     { "path": "pages/family/list", "style": { "navigationBarTitleText": "家庭成员", "navigationStyle": "custom" } },
     { "path": "pages/family/add", "style": { "navigationBarTitleText": "添加成员", "navigationStyle": "custom" } },
     { "path": "pages/family/detail", "style": { "navigationBarTitleText": "健康档案", "navigationStyle": "custom" } },
+    { "path": "pages/consultation/select", "style": { "navigationBarTitleText": "选择成员", "navigationStyle": "custom" } },
     { "path": "pages/consultation/index", "style": { "navigationBarTitleText": "AI问诊", "navigationStyle": "custom" } },
     { "path": "pages/consultation/chat", "style": { "navigationBarTitleText": "AI问诊", "navigationStyle": "custom" } },
     { "path": "pages/consultation/history", "style": { "navigationBarTitleText": "问诊记录", "navigationStyle": "custom" } },

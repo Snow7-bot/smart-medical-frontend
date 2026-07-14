@@ -9,7 +9,7 @@
     </view>
       <view class="mem-info">
         <text class="mem-name">{{m.name}}</text>
-        <text class="mem-meta">{{m.relation}} · {{m.age}}岁 · {{m.gender==='male'?'男':'女'}}</text>
+        <text class="mem-meta">{{m.relation}} · {{calcAge(m.birthDate)}}岁 · {{genderLabel(m.gender)}}</text>
       </view>
       <text class="mem-arrow">&#x2192;</text>
     </view>
@@ -27,6 +27,19 @@ const store = useAppStore();
 const colors = ["#667eea","#4facfe","#43e97b","#f6d365","#fa709a"];
 const members = computed(() => store.familyMembers);
 function nav(u){uni.navigateTo({url:u});}
+function calcAge(birthDate) {
+  if (!birthDate) return "?";
+  const birth = new Date(birthDate);
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) age--;
+  return age;
+}
+function genderLabel(g) {
+  if (g === 1 || g === "male") return "男";
+  if (g === 2 || g === "female") return "女";
+  return "?";
+}
 onMounted(async ()=>{
   try {
     const list = await familyApi.getList();

@@ -7,7 +7,7 @@
       <view class="m-avatar" :style="{background:colors[m.id%5]}">
       <text class="m-initial">{{ m.name[0] }}</text>
     </view>
-      <view><text class="m-name">{{ m.name }}</text><text class="m-meta">{{ m.age }}岁 · {{ m.gender==='male'?'男':'女' }} · {{ m.relation }}</text></view>
+      <view><text class="m-name">{{ m.name }}</text><text class="m-meta">{{ m.age || '?' }}岁 · {{ genderLabel(m.gender) }} · {{ m.relation }}</text></view>
     </view>
   </view>
   <view class="card">
@@ -31,7 +31,9 @@ import { familyApi } from "@/api/family.js";
 import { medicalRecordApi } from "@/api/medical-record.js";
 const store = useAppStore();
 const colors=["#667eea","#4facfe","#43e97b","#f6d365","#fa709a"];
-const m=ref(store.currentMember || {id:1,name:"未知",age:0,gender:"male",relation:"未知",history:"无",allergy:"无"});
+const m=ref(store.currentMember || {id:1,name:"未知",age:0,gender:1,relation:"未知",history:"无",allergy:"无"});
+function calcAge(birthDate) { if (!birthDate) return "?"; const b = new Date(birthDate); const n = new Date(); let a = n.getFullYear()-b.getFullYear(); if (n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate())) a--; return a; }
+function genderLabel(g) { if (g===1||g==="male") return "男"; if (g===2||g==="female") return "女"; return "?"; }
 const recs=ref([]);
 
 onMounted(async () => {
@@ -43,8 +45,8 @@ onMounted(async () => {
         m.value = {
           id: data.id || data.patientId,
           name: data.name || data.patientName,
-          age: data.age || 0,
-          gender: data.gender || "male",
+          age: calcAge(data.birthDate),
+          gender: data.gender != null ? data.gender : 1,
           relation: data.relation || "未知",
           history: data.history || data.medicalHistory || "无",
           allergy: data.allergy || data.allergies || "无",

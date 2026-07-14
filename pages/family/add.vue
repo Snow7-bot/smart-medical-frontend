@@ -61,12 +61,16 @@ async function save(){
   }
   if(!f.value.name||!f.value.age){uni.showToast({title:"请填写姓名和年龄",icon:"none"});return;}
   try {
+    const age = parseInt(f.value.age) || 0;
+    const birthYear = new Date().getFullYear() - age;
+    const birthDate = birthYear + "-01-01";
     const genderLetter = f.value.gender === "male" ? "M" : "F";
     await familyApi.addMember({
       name: f.value.name,
       relation: rels[ri.value],
       gender: genderLetter,
-      age: parseInt(f.value.age) || 0,
+      birthDate: birthDate,
+      age: age,
       history: f.value.history || "",
       allergy: f.value.allergy || "",
     });
