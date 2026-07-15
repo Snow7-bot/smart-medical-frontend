@@ -8,13 +8,13 @@
   </view>
 
   <view class="big-btn" @click="goSelect()">
-    <text class="big-btn-icon">👨‍👩‍👧‍👦</text>
+    
     <text class="big-btn-title">选择问诊成员</text>
     <text class="big-btn-desc">为家庭成员进行AI智能问诊</text>
   </view>
 
   <view class="section-label">最近问诊</view>
-  <view class="hist-item" v-for="h in history" :key="h.id" @click="goSelect()">
+  <view class="hist-item" v-for="h in history" :key="h.id" @click="goSelect()" @longpress="deleteHistory(h)">
     <text class="hi-symptom">{{ h.symptom }}</text>
     <view class="hi-badge" :style="{background:h.sev=='urgent'?'rgba(250,112,154,0.12)':'rgba(67,233,123,0.12)',color:h.sev=='urgent'?'#fa709a':'#43e97b'}">{{ h.sev=='urgent'?'急症':'轻症' }}</view>
     <text class="hi-time">{{ h.time }}</text>
@@ -25,6 +25,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { consultApi } from "@/api/consultation.js";
+import { conversationApi } from "@/api/conversation.js";
 
 const history = ref([]);
 
@@ -42,6 +43,23 @@ onMounted(async () => {
 });
 
 function goSelect() { uni.navigateTo({ url: "/pages/consultation/select" }); }
+
+function deleteHistory(h) {
+  uni.showModal({
+    title: "删除记录",
+    content: "确定删除「" + h.symptom + "」的问诊记录吗？",
+    success: async (res) => {
+      if (!res.confirm) return;
+      try {
+        await conversationApi.delete(h.id);
+        history.value = history.value.filter(item => item.id !== h.id);
+        uni.showToast({ title: "已删除", icon: "success" });
+      } catch(e) {
+        uni.showToast({ title: "删除失败", icon: "none" });
+      }
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>
