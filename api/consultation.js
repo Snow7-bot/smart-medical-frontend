@@ -3,6 +3,7 @@ import { conversationApi } from "@/api/conversation.js";
 
 export const consultApi = {
   sendText: (d) => req.post("/consultation/chat", d),
+  getOverview: (patientId) => req.get("/consultation/overview", { patientId }),
   getHistory: async (p) => {
     // 先尝试问诊历史API
     try {

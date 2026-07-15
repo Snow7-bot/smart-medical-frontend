@@ -1,7 +1,7 @@
 ﻿<template>
 <view class="page">
   <view class="status-bar-fill"></view>
-  <view class="nav"><view class="back" @click="uni.navigateBack()">&#x2039;</view><text class="nav-t">AI问诊 · {{ memberName || '未选择成员' }}</text></view>
+  <view class="nav"><view class="back" @click="uni.navigateBack()">&#x2039;</view><text class="nav-t">AI问诊 {{ memberName }}</text></view>
 
   <view class="msg-wrap">
     <scroll-view class="msgs" scroll-y :scroll-into-view="scrollToId" scroll-with-animation id="msgList">
@@ -36,6 +36,7 @@
 
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted } from "vue";
+import { onLoad } from "@dcloudio/uni-app";
 import { consultApi } from "@/api/consultation.js";
 import { conversationApi } from "@/api/conversation.js";
 import { asrApi } from "@/api/asr.js";
@@ -51,12 +52,31 @@ const thinking = ref(false);
 const memberId = ref(null);
 const memberName = ref("");
 
-onMounted(() => {
-  const pages = getCurrentPages();
-  const opts = (pages[pages.length - 1] || {}).options || {};
+onLoad((opts) => {
   if (opts.memberId) memberId.value = opts.memberId;
-  if (opts.memberName) memberName.value = decodeURIComponent(opts.memberName);
-  if (opts.q) { txt.value = decodeURIComponent(opts.q); setTimeout(() => sendMsg(), 200); }
+  if (opts.memberName) memberName.value = decodeURIComponent(opts.memberName || "");
+  if (opts.q) txt.value = decodeURIComponent(opts.q);
+});
+
+onMounted(async () => {
+  // 有成员 → 主动加载健康概览
+  if (memberId.value) {
+    messages.value[0] = { id: 1, role: "ai", content: "🔍 正在分析 " + memberName.value + " 的健康档案..." };
+    thinking.value = true;
+    scrollToBottom();
+    try {
+      const res = await consultApi.getOverview(memberId.value);
+      const data = res.data || res;
+      messages.value[0] = { id: 1, role: "ai", content: data.reply || "暂未找到健康记录。" };
+    } catch(e) {
+      messages.value[0] = { id: 1, role: "ai", content: "您好，我是您的智能医疗助手。请描述您的症状：\n· 哪里不舒服？\n· 持续多久了？\n· 有无其他症状？" };
+    } finally {
+      thinking.value = false;
+      scrollToBottom();
+    }
+  }
+
+  if (txt.value) { setTimeout(() => sendMsg(), 300); }
   scrollToBottom();
 });
 

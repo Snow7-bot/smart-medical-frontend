@@ -165,7 +165,7 @@ function loadLocalMeds() {
 
 function navTo(key) {
   const map = {
-    consult: "/pages/consultation/chat", family: "/pages/family/list", familyAdd: "/pages/family/add", trend: "/pages/health/trend",
+    consult: "/pages/consultation/index", family: "/pages/family/list", familyAdd: "/pages/family/add", trend: "/pages/health/trend",
     medTab: "/pages/tabbar/medication/medication",
   };
   if (key === "medTab") {
