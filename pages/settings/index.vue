@@ -12,10 +12,6 @@
     <view class="li" @click="about"><text class="lil">版本信息</text><text class="liv">v1.0 &#x2192;</text></view>
     <view class="li" @click="tap"><text class="lil">用户协议</text><text class="liv">查看</text></view>
   </view>
-  <view class="section-label">数据管理</view>
-  <view class="list-group">
-    <view class="li" @click="checkConnection"><text class="lil">API连接状态</text><text class="liv" :style="{color: apiConnected ? '#43e97b' : '#fa709a'}">{{ apiStatus }}</text></view>
-  </view>
 </view>
 </template>
 
